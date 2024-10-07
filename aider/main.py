@@ -408,11 +408,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Add a new argument for running as an API server
     parser.add_argument('--api', action='store_true', help='Run Aider as an API server')
+    parser.add_argument('--api-port', type=int, default=8000, help='Port for the API server')
     args = parser.parse_args(argv)
 
     if args.api:
         # Run Aider as an API server
-        uvicorn.run(api_app, host="0.0.0.0", port=8000)
+        from aider.api import app as api_app
+        import uvicorn
+        uvicorn.run(api_app, host="0.0.0.0", port=args.api_port)
         return
 
     if not args.verify_ssl:

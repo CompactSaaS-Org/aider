@@ -704,7 +704,13 @@ class Coder:
     def run_stream(self, user_message):
         self.io.user_input(user_message)
         self.init_before_message()
-        yield from self.send_message(user_message)
+        response = ""
+        for chunk in self.send_message(user_message):
+            response += chunk
+            yield chunk
+        self.partial_response_content = response
+        self.apply_updates()
+        return response
 
     def init_before_message(self):
         self.aider_edited_files = set()
