@@ -8,6 +8,7 @@ import traceback
 from pathlib import Path
 
 import git
+import numpy as np
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
 
@@ -406,6 +407,29 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Parse again to include any arguments that might have been defined in .env
     args = parser.parse_args(argv)
+
+    io = InputOutput(
+        args.pretty,
+        args.yes_always,
+        args.input_history_file,
+        args.chat_history_file,
+        input=input,
+        output=output,
+        user_input_color=args.user_input_color,
+        tool_output_color=args.tool_output_color,
+        tool_warning_color=args.tool_warning_color,
+        tool_error_color=args.tool_error_color,
+        completion_menu_color=args.completion_menu_color,
+        completion_menu_bg_color=args.completion_menu_bg_color,
+        completion_menu_current_color=args.completion_menu_current_color,
+        completion_menu_current_bg_color=args.completion_menu_current_bg_color,
+        assistant_output_color=args.assistant_output_color,
+        code_theme=args.code_theme,
+        dry_run=args.dry_run,
+        encoding=args.encoding,
+        llm_history_file=args.llm_history_file,
+        editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
+    )
 
     # Initialize VectorStore
     vectorstore = None
