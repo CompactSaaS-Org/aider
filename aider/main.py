@@ -176,6 +176,7 @@ def launch_gui(args, vectorstore):
 
     from aider import gui
 
+    print("DEBUG: Entering launch_gui function")
     print()
     print("CONTROL-C to exit...")
 
@@ -201,12 +202,15 @@ def launch_gui(args, vectorstore):
     st_args += ["--"] + args
 
     # Pass vectorstore to the GUI
+    print("DEBUG: Passing vectorstore to GUI")
     gui.vectorstore = vectorstore
 
     # Store vectorstore in session state
     import streamlit as st
+    print("DEBUG: Storing vectorstore in session state")
     st.session_state['vectorstore'] = vectorstore
 
+    print("DEBUG: Launching Streamlit CLI")
     cli.main(st_args)
 
     # from click.testing import CliRunner
@@ -362,6 +366,7 @@ def sanity_check_repo(repo, io):
 
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
+    print("DEBUG: Entering main function")
     report_uncaught_exceptions()
 
     if argv is None:
@@ -443,6 +448,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Initialize VectorStore
     vectorstore = None
     if args.use_vectorstore:
+        print("DEBUG: Initializing VectorStore (1st time)")
         io.tool_output("Initializing VectorStore...")
         vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
 
@@ -507,12 +513,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_warning("Terminal does not support pretty output (UnicodeDecodeError)")
 
     # Initialize VectorStore
-    vectorstore = None
-    if args.use_vectorstore:
+    if args.use_vectorstore and vectorstore is None:
+        print("DEBUG: Initializing VectorStore (2nd time)")
         io.tool_output("Initializing VectorStore...")
         vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
 
     if args.gui and not return_coder:
+        print("DEBUG: Launching GUI")
         if not check_streamlit_install(io):
             return 1
         try:
@@ -881,9 +888,11 @@ def check_and_load_imports(io, verbose=False):
 
 
 def initialize_vectorstore(vectorstore_conf_files, aws_profile, io):
+    print("DEBUG: Entering initialize_vectorstore function")
     for conf_file in vectorstore_conf_files:
         if Path(conf_file).exists():
             try:
+                print(f"DEBUG: Attempting to initialize VectorStore with {conf_file}")
                 vectorstore = VectorStore(conf_file)
                 io.tool_output(f"Loaded vectorstore configuration from {conf_file}")
                 
@@ -893,9 +902,11 @@ def initialize_vectorstore(vectorstore_conf_files, aws_profile, io):
                         io.tool_output("Vector database schema and table are set up and ready to use.")
                         
                         # Connect to Bedrock
+                        print("DEBUG: Connecting to AWS Bedrock")
                         vectorstore.connect_to_bedrock(aws_profile)
                         io.tool_output(f"Connected to AWS Bedrock for embeddings generation using profile: {aws_profile or 'default'}")
                         
+                        print("DEBUG: Returning initialized vectorstore")
                         return vectorstore
                     else:
                         io.tool_error("Failed to set up vector database schema and table.")
@@ -904,6 +915,7 @@ def initialize_vectorstore(vectorstore_conf_files, aws_profile, io):
             except Exception as e:
                 io.tool_error(f"Failed to initialize VectorStore with {conf_file}: {str(e)}")
     
+    print("DEBUG: VectorStore initialization failed")
     io.tool_error("VectorStore configuration file not found.")
     io.tool_output("Please ensure the vectorstore_config.yaml file exists in the root of the project.")
     io.tool_output("Continuing without vectorstore functionality.")
