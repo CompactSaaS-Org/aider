@@ -57,6 +57,7 @@ frozenlist==1.4.1
 fsspec==2024.9.0
     # via huggingface-hub
 gitdb==4.0.11
+GitPython==3.1.43
     # via gitpython
 gitpython==3.1.43
     # via -r requirements/requirements.in
