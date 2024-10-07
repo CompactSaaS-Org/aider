@@ -203,6 +203,10 @@ def launch_gui(args, vectorstore):
     # Pass vectorstore to the GUI
     gui.vectorstore = vectorstore
 
+    # Store vectorstore in session state
+    import streamlit as st
+    st.session_state['vectorstore'] = vectorstore
+
     cli.main(st_args)
 
     # from click.testing import CliRunner
