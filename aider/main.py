@@ -451,7 +451,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                             io.tool_output("Vector database schema and table are set up and ready to use.")
                             
                             # Test vectorstore functionality
-                            test_vector = np.random.rand(vectorstore.config['vector_dimension'])
+                            test_vector = np.random.rand(vectorstore.config['vector_dimension']).tolist()
                             vectorstore.add_vector("test_document", test_vector, {"test": "metadata"})
                             io.tool_output("Added test vector to vectorstore")
                             
@@ -469,9 +469,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     io.tool_error(f"Failed to initialize or test VectorStore with {conf_file}: {str(e)}")
         else:
             io.tool_error("VectorStore configuration file not found.")
-            io.tool_output("Please ensure the .aider.vectorstore.yml file exists in one of the following locations:")
-            for conf_file in vectorstore_conf_files:
-                io.tool_output(f"  - {conf_file}")
+            io.tool_output("Please ensure the vectorstore_config.yaml file exists in the root of the project.")
             io.tool_output("Continuing without vectorstore functionality.")
     else:
         io.tool_output("VectorStore is not being used.")

@@ -61,7 +61,7 @@ class VectorStore:
             with self.connection.cursor() as cursor:
                 cursor.execute(
                     f"INSERT INTO {self.config['schema_name']}.{self.config['table_name']} (id, chunks, embedding, metadata) VALUES (%s, %s, %s::vector, %s)",
-                    (uuid.uuid4(), chunk, embedding, Json(metadata))
+                    (str(uuid.uuid4()), chunk, embedding, Json(metadata))
                 )
             self.connection.commit()
             return True
