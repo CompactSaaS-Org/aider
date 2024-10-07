@@ -10,8 +10,16 @@ class VectorStore:
         self.connection = None
 
     def load_config(self, config_file: str) -> Dict[str, Any]:
-        with open(config_file, 'r') as f:
-            return yaml.safe_load(f)
+        try:
+            with open(config_file, 'r') as f:
+                config = yaml.safe_load(f)
+            if not isinstance(config, dict):
+                raise ValueError("Config file does not contain a valid YAML dictionary")
+            return config
+        except yaml.YAMLError as e:
+            raise ValueError(f"Error parsing YAML in config file: {e}")
+        except IOError as e:
+            raise ValueError(f"Error reading config file: {e}")
 
     def connect(self, verbose=False) -> bool:
         try:
