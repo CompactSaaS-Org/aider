@@ -413,12 +413,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Parse again to include any arguments that might have been defined in .env
     args = parser.parse_args(argv)
 
-    # Initialize VectorStore
-    vectorstore = None
-    if args.use_vectorstore:
-        io.tool_output("Initializing VectorStore...")
-        vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
-
     io = InputOutput(
         args.pretty,
         args.yes_always,
@@ -603,6 +597,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         os.environ["OPENAI_API_TYPE"] = args.openai_api_type
     if args.openai_organization_id:
         os.environ["OPENAI_ORGANIZATION"] = args.openai_organization_id
+
+    # Initialize VectorStore
+    vectorstore = None
+    if args.use_vectorstore:
+        io.tool_output("Initializing VectorStore...")
+        vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
 
     register_models(git_root, args.model_settings_file, io, verbose=args.verbose)
     register_litellm_models(git_root, args.model_metadata_file, io, verbose=args.verbose)
