@@ -171,7 +171,7 @@ def check_streamlit_install(io):
         return False
 
 
-def launch_gui(args):
+def launch_gui(args, vectorstore):
     from streamlit.web import cli
 
     from aider import gui
@@ -199,6 +199,9 @@ def launch_gui(args):
         ]
 
     st_args += ["--"] + args
+
+    # Pass vectorstore to the GUI
+    gui.vectorstore = vectorstore
 
     cli.main(st_args)
 
@@ -437,34 +440,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     vectorstore = None
     if args.use_vectorstore:
         io.tool_output("Initializing VectorStore...")
-        for conf_file in vectorstore_conf_files:
-            if Path(conf_file).exists():
-                try:
-                    vectorstore = VectorStore(conf_file)
-                    io.tool_output(f"Loaded vectorstore configuration from {conf_file}")
-                    
-                    if vectorstore.connect(verbose=True):
-                        io.tool_output("Successfully connected to vector database.")
-                        if vectorstore.create_schema_and_table_if_not_exists(verbose=True):
-                            io.tool_output("Vector database schema and table are set up and ready to use.")
-                            
-                            # Connect to Bedrock
-                            vectorstore.connect_to_bedrock(args.aws_profile)
-                            io.tool_output(f"Connected to AWS Bedrock for embeddings generation using profile: {args.aws_profile or 'default'}")
-                            
-                            break
-                        else:
-                            io.tool_error("Failed to set up vector database schema and table.")
-                    else:
-                        io.tool_error("Failed to connect to vector database.")
-                except Exception as e:
-                    io.tool_error(f"Failed to initialize VectorStore with {conf_file}: {str(e)}")
-        else:
-            io.tool_error("VectorStore configuration file not found.")
-            io.tool_output("Please ensure the vectorstore_config.yaml file exists in the root of the project.")
-            io.tool_output("Continuing without vectorstore functionality.")
-    else:
-        io.tool_output("VectorStore is not being used.")
+        vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
 
     if not args.verify_ssl:
         import httpx
@@ -530,7 +506,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         if not check_streamlit_install(io):
             return 1
         try:
-            launch_gui(argv)
+            launch_gui(argv, vectorstore)
         except Exception as e:
             io.tool_error(f"Failed to launch GUI: {str(e)}")
             io.tool_output("Make sure all required dependencies are installed.")
@@ -891,6 +867,35 @@ def check_and_load_imports(io, verbose=False):
         if verbose:
             io.tool_output(f"Full exception details: {traceback.format_exc()}")
 
+
+def initialize_vectorstore(vectorstore_conf_files, aws_profile, io):
+    for conf_file in vectorstore_conf_files:
+        if Path(conf_file).exists():
+            try:
+                vectorstore = VectorStore(conf_file)
+                io.tool_output(f"Loaded vectorstore configuration from {conf_file}")
+                
+                if vectorstore.connect(verbose=True):
+                    io.tool_output("Successfully connected to vector database.")
+                    if vectorstore.create_schema_and_table_if_not_exists(verbose=True):
+                        io.tool_output("Vector database schema and table are set up and ready to use.")
+                        
+                        # Connect to Bedrock
+                        vectorstore.connect_to_bedrock(aws_profile)
+                        io.tool_output(f"Connected to AWS Bedrock for embeddings generation using profile: {aws_profile or 'default'}")
+                        
+                        return vectorstore
+                    else:
+                        io.tool_error("Failed to set up vector database schema and table.")
+                else:
+                    io.tool_error("Failed to connect to vector database.")
+            except Exception as e:
+                io.tool_error(f"Failed to initialize VectorStore with {conf_file}: {str(e)}")
+    
+    io.tool_error("VectorStore configuration file not found.")
+    io.tool_output("Please ensure the vectorstore_config.yaml file exists in the root of the project.")
+    io.tool_output("Continuing without vectorstore functionality.")
+    return None
 
 def load_slow_imports(swallow=True):
     # These imports are deferred in various ways to
