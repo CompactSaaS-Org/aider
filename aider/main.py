@@ -413,6 +413,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Parse again to include any arguments that might have been defined in .env
     args = parser.parse_args(argv)
 
+    # Initialize VectorStore
+    vectorstore = None
+    if args.use_vectorstore:
+        io.tool_output("Initializing VectorStore...")
+        vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
+
     io = InputOutput(
         args.pretty,
         args.yes_always,
