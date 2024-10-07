@@ -502,6 +502,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io = get_io(False)
         io.tool_warning("Terminal does not support pretty output (UnicodeDecodeError)")
 
+    # Initialize VectorStore
+    vectorstore = None
+    if args.use_vectorstore:
+        io.tool_output("Initializing VectorStore...")
+        vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
+
     if args.gui and not return_coder:
         if not check_streamlit_install(io):
             return 1
@@ -597,12 +603,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         os.environ["OPENAI_API_TYPE"] = args.openai_api_type
     if args.openai_organization_id:
         os.environ["OPENAI_ORGANIZATION"] = args.openai_organization_id
-
-    # Initialize VectorStore
-    vectorstore = None
-    if args.use_vectorstore:
-        io.tool_output("Initializing VectorStore...")
-        vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
 
     register_models(git_root, args.model_settings_file, io, verbose=args.verbose)
     register_litellm_models(git_root, args.model_metadata_file, io, verbose=args.verbose)
