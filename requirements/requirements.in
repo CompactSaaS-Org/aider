@@ -57,3 +57,6 @@ numpy<2
 # Going past this makes dependencies unresolvable
 # Seems to be caused by sentence-transformers
 tokenizers==0.19.1
+
+# AWS SDK for Python
+boto3
