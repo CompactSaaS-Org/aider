@@ -37,16 +37,21 @@ VIDEO END -->
 </p>
 
 ## Getting started
-<!--[[[cog
-# We can't "include" here.
-# Because this page is rendered by GitHub as the repo README
-cog.out(open("aider/website/_includes/get-started.md").read())
-]]]-->
 
-You can get started quickly like this:
+It's recommended to use a virtual environment for this project. Here's how you can set it up:
 
-```
-python -m pip install -U aider-chat
+```bash
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate the virtual environment
+# On Windows:
+# venv\Scripts\activate
+# On macOS and Linux:
+source venv/bin/activate
+
+# Install aider-chat
+pip install -U aider-chat
 
 # Change directory into a git repo
 cd /to/your/git/repo
@@ -58,8 +63,12 @@ aider
 # Work with GPT-4o on your repo
 export OPENAI_API_KEY=your-key-goes-here
 aider 
+
+# When you're done, deactivate the virtual environment
+deactivate
 ```
-<!--[[[end]]]-->
+
+Make sure to activate the virtual environment every time you work on the project.
 
 See the
 [installation instructions](https://aider.chat/docs/install.html)
