@@ -161,12 +161,13 @@ def check_gitignore(git_root, io, ask=True):
 
 
 def check_streamlit_install(io):
-    return utils.check_pip_install_extra(
-        io,
-        "streamlit",
-        "You need to install the aider browser feature",
-        ["aider-chat[browser]"],
-    )
+    try:
+        import streamlit
+        return True
+    except ImportError:
+        io.tool_error("Streamlit is not installed. You need to install it for the browser feature.")
+        io.tool_output("Try running: pip install streamlit")
+        return False
 
 
 def launch_gui(args):
@@ -476,9 +477,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     if args.gui and not return_coder:
         if not check_streamlit_install(io):
-            return
-        launch_gui(argv)
-        return
+            return 1
+        try:
+            launch_gui(argv)
+        except Exception as e:
+            io.tool_error(f"Failed to launch GUI: {str(e)}")
+            io.tool_output("Make sure all required dependencies are installed.")
+            return 1
+        return 0
 
     if args.verbose:
         for fname in loaded_dotenvs:
