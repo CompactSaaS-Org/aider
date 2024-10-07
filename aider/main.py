@@ -415,8 +415,16 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             vectorstore = VectorStore(str(vectorstore_conf_path))
             if args.verbose:
                 print(f"Loaded vectorstore configuration from {vectorstore_conf_path}")
+            
+            # Test vectorstore functionality
+            test_vector = np.random.rand(768)  # Assuming 768-dimensional vectors
+            vectorstore.add_vector("test_document", test_vector)
+            print("Added test vector to vectorstore")
+            
+            similar_vectors = vectorstore.search_vectors(test_vector, top_k=1)
+            print(f"Found similar vector: {similar_vectors[0].id}, score: {similar_vectors[0].score:.4f}")
         except Exception as e:
-            io.tool_error(f"Failed to initialize VectorStore: {str(e)}")
+            io.tool_error(f"Failed to initialize or test VectorStore: {str(e)}")
             io.tool_output("Continuing without vectorstore functionality.")
 
     if not args.verify_ssl:
