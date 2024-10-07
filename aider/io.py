@@ -654,6 +654,16 @@ class InputOutput:
         style = RichStyle(**style)
         self.console.print(*messages, style=style)
 
+    def display_vector_search_results(self, results):
+        self.rule()
+        self.tool_output("Vector search results:")
+        for result in results:
+            self.tool_output(f"- Chunk: {result['chunk']}")
+            self.tool_output(f"  Metadata: {result['metadata']}")
+            self.tool_output(f"  Distance: {result['distance']}")
+            self.rule()
+        self.tool_output("The context has been augmented with the search results.")
+
     def get_assistant_mdstream(self):
         mdargs = dict(style=self.assistant_output_color, code_theme=self.code_theme)
         mdStream = MarkdownStream(mdargs=mdargs)
