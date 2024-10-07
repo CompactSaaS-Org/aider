@@ -16,19 +16,19 @@ class VectorStore:
             if not isinstance(config, dict):
                 raise ValueError("Config file does not contain a valid YAML dictionary")
             required_keys = ['host', 'port', 'user', 'password', 'database', 'schema_name', 'table_name', 'vector_dimension']
-            for key in required_keys:
-                if key not in config:
-                    raise ValueError(f"Missing required key '{key}' in config file")
+            missing_keys = [key for key in required_keys if key not in config]
+            if missing_keys:
+                raise ValueError(f"Missing required keys in config file: {', '.join(missing_keys)}")
             return config
         except yaml.YAMLError as e:
             raise ValueError(f"Error parsing YAML in config file: {e}")
         except IOError as e:
-            raise ValueError(f"Error reading config file: {e}")
+            raise ValueError(f"Error reading config file '{config_file}': {e}")
 
     def connect(self, verbose=False) -> bool:
         try:
             if verbose:
-                print("Attempting to connect to vector database...")
+                print(f"Attempting to connect to vector database at {self.config['host']}:{self.config['port']}...")
             self.connection = psycopg2.connect(
                 host=self.config['host'],
                 port=self.config['port'],
@@ -37,11 +37,12 @@ class VectorStore:
                 database=self.config['database']
             )
             if verbose:
-                print("Successfully connected to vector database.")
+                print(f"Successfully connected to vector database {self.config['database']}.")
             return True
         except psycopg2.Error as e:
             if verbose:
                 print(f"Error connecting to vector database: {e}")
+                print(f"Connection details: host={self.config['host']}, port={self.config['port']}, user={self.config['user']}, database={self.config['database']}")
             return False
 
     def disconnect(self) -> None:

@@ -382,7 +382,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     default_config_files = list(map(str, default_config_files))
 
     vectorstore_conf_files = generate_search_path_list(
-        ".aider.vectorstore.yml", git_root, None
+        "vectorstore_config.yaml", git_root, None
     )
 
     parser = get_parser(default_config_files, git_root)
@@ -449,24 +449,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                         io.tool_output("Successfully connected to vector database.")
                         if vectorstore.create_schema_and_table_if_not_exists(verbose=True):
                             io.tool_output("Vector database schema and table are set up and ready to use.")
-                            
-                            # Test vectorstore functionality
-                            test_vector = np.random.rand(vectorstore.config['vector_dimension']).tolist()
-                            vectorstore.add_vector("test_document", test_vector, {"test": "metadata"})
-                            io.tool_output("Added test vector to vectorstore")
-                            
-                            similar_vectors = vectorstore.search_vectors(test_vector, limit=1)
-                            if similar_vectors:
-                                io.tool_output(f"Found similar vector: {similar_vectors[0]['id']}, distance: {similar_vectors[0]['distance']:.4f}")
-                            else:
-                                io.tool_output("No similar vectors found in test search.")
+                            break
                         else:
                             io.tool_error("Failed to set up vector database schema and table.")
                     else:
                         io.tool_error("Failed to connect to vector database.")
-                    break
                 except Exception as e:
-                    io.tool_error(f"Failed to initialize or test VectorStore with {conf_file}: {str(e)}")
+                    io.tool_error(f"Failed to initialize VectorStore with {conf_file}: {str(e)}")
         else:
             io.tool_error("VectorStore configuration file not found.")
             io.tool_output("Please ensure the vectorstore_config.yaml file exists in the root of the project.")
