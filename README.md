@@ -50,6 +50,9 @@ python3 -m venv venv
 # On macOS and Linux:
 source venv/bin/activate
 
+# Install dependencies
+pip install -r requirements.txt
+
 # Install aider-chat
 pip install -U aider-chat
 
@@ -68,7 +71,13 @@ aider
 deactivate
 ```
 
-Make sure to activate the virtual environment every time you work on the project.
+Make sure to activate the virtual environment every time you work on the project. You can do this by running:
+
+```bash
+source venv/bin/activate  # On macOS and Linux
+# or
+venv\Scripts\activate  # On Windows
+```
 
 See the
 [installation instructions](https://aider.chat/docs/install.html)
