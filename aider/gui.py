@@ -183,6 +183,8 @@ class GUI:
         # with st.expander("Add to the chat", expanded=True):
         self.do_add_files()
         self.do_add_web_page()
+        self.do_upload_document()
+        self.show_vectorstore_status()
 
     def do_add_files(self):
         fnames = st.multiselect(
@@ -494,6 +496,34 @@ class GUI:
         else:
             self.info(f"No web content found for `{url}`.")
             self.web_content = None
+
+    def do_upload_document(self):
+        with st.expander("Upload document to vector store"):
+            uploaded_file = st.file_uploader("Choose a file", type=["txt", "pdf", "docx"])
+            if uploaded_file is not None:
+                # Read file content
+                if uploaded_file.type == "text/plain":
+                    content = uploaded_file.getvalue().decode("utf-8")
+                else:
+                    st.warning("Only .txt files are currently supported for direct reading. For .pdf and .docx, please convert to .txt first.")
+                    return
+
+                # Upload to vector store
+                if self.coder.vectorstore:
+                    metadata = {"filename": uploaded_file.name, "filetype": uploaded_file.type}
+                    if self.coder.vectorstore.upload_document(content, metadata):
+                        st.success(f"Successfully uploaded {uploaded_file.name} to vector store")
+                    else:
+                        st.error(f"Failed to upload {uploaded_file.name} to vector store")
+                else:
+                    st.error("Vector store is not initialized")
+
+    def show_vectorstore_status(self):
+        if self.coder.vectorstore:
+            status = self.coder.vectorstore.get_connection_status()
+            st.sidebar.text(status)
+        else:
+            st.sidebar.text("Vector store not initialized")
 
     def do_undo(self, commit_hash):
         self.last_undo_empty.empty()

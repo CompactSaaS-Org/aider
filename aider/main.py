@@ -726,6 +726,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             chat_language=args.chat_language,
             vectorstore=vectorstore,
         )
+
+        # Ensure vectorstore is accessible in the GUI
+        if return_coder:
+            coder.vectorstore = vectorstore
     except ValueError as err:
         io.tool_error(str(err))
         return 1

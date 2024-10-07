@@ -96,6 +96,21 @@ class VectorStore:
             print(f"Error searching vectors: {e}")
             return []
 
+    def upload_document(self, document_text: str, metadata: Dict[str, Any]) -> bool:
+        # This is a placeholder method. In a real implementation, you would:
+        # 1. Split the document into chunks
+        # 2. Generate embeddings for each chunk
+        # 3. Add each chunk and its embedding to the vector store
+        # For now, we'll just add the whole document as one chunk with a dummy embedding
+        dummy_embedding = [0.0] * self.config['vector_dimension']
+        return self.add_vector(document_text, dummy_embedding, metadata)
+
+    def get_connection_status(self) -> str:
+        if self.is_connected():
+            return "Connected to vector store"
+        else:
+            return "Not connected to vector store"
+
     def create_schema_and_table_if_not_exists(self, verbose=False) -> bool:
         if not self.is_connected():
             if verbose:
