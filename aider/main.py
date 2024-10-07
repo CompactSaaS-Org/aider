@@ -721,8 +721,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             suggest_shell_commands=args.suggest_shell_commands,
             chat_language=args.chat_language,
             vectorstore=vectorstore,
-            from_coder=from_coder,
-            summarize_from_coder=summarize_from_coder,
         )
 
         # Ensure vectorstore is accessible in the GUI
