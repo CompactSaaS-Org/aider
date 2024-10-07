@@ -709,6 +709,11 @@ def get_parser(default_config_files, git_root):
         action="store_true",
         help="Enable vectorstore functionality",
     )
+    group.add_argument(
+        "--aws-profile",
+        metavar="AWS_PROFILE",
+        help="Specify the AWS profile to use for authentication",
+    )
 
     return parser
 
