@@ -14,3 +14,4 @@ aider/__version__.py
 .venv/
 venv/
 vectorstore_config.yaml
+vectorstore_config.yaml
