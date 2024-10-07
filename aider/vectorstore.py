@@ -13,8 +13,10 @@ class VectorStore:
         with open(config_file, 'r') as f:
             return yaml.safe_load(f)
 
-    def connect(self) -> bool:
+    def connect(self, verbose=False) -> bool:
         try:
+            if verbose:
+                print("Attempting to connect to vector database...")
             self.connection = psycopg2.connect(
                 host=self.config['host'],
                 port=self.config['port'],
@@ -22,9 +24,12 @@ class VectorStore:
                 password=self.config['password'],
                 database=self.config['database']
             )
+            if verbose:
+                print("Successfully connected to vector database.")
             return True
         except psycopg2.Error as e:
-            print(f"Error connecting to database: {e}")
+            if verbose:
+                print(f"Error connecting to vector database: {e}")
             return False
 
     def disconnect(self) -> None:
@@ -78,18 +83,26 @@ class VectorStore:
             print(f"Error searching vectors: {e}")
             return []
 
-    def create_schema_and_table_if_not_exists(self) -> bool:
+    def create_schema_and_table_if_not_exists(self, verbose=False) -> bool:
         if not self.is_connected():
-            print("Not connected to the database. Call connect() first.")
+            if verbose:
+                print("Not connected to the vector database. Call connect() first.")
             return False
 
         try:
             with self.connection.cursor() as cursor:
+                if verbose:
+                    print("Setting up vector database schema and table...")
+                
                 # Create schema if not exists
                 cursor.execute(f"CREATE SCHEMA IF NOT EXISTS {self.config['schema_name']}")
+                if verbose:
+                    print(f"Schema '{self.config['schema_name']}' created or already exists.")
                 
                 # Create extension if not exists
                 cursor.execute("CREATE EXTENSION IF NOT EXISTS vector")
+                if verbose:
+                    print("Vector extension created or already exists.")
                 
                 # Create table if not exists
                 cursor.execute(f"""
@@ -100,6 +113,8 @@ class VectorStore:
                         metadata JSONB
                     )
                 """)
+                if verbose:
+                    print(f"Table '{self.config['table_name']}' created or already exists.")
                 
                 # Create index if not exists
                 cursor.execute(f"""
@@ -108,10 +123,15 @@ class VectorStore:
                     USING hnsw (embedding vector_cosine_ops) 
                     WITH (ef_construction=256)
                 """)
+                if verbose:
+                    print(f"Index on '{self.config['table_name']}' created or already exists.")
             
             self.connection.commit()
+            if verbose:
+                print("Vector database setup completed successfully.")
             return True
         except psycopg2.Error as e:
-            print(f"Error creating schema and table: {e}")
+            if verbose:
+                print(f"Error creating schema and table: {e}")
             self.connection.rollback()
             return False
