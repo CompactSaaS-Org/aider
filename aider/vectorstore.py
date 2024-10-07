@@ -3,11 +3,14 @@ import psycopg2
 from psycopg2.extras import Json
 import uuid
 from typing import Dict, List, Any
+import boto3
+import json
 
 class VectorStore:
     def __init__(self, config_file: str):
         self.config = self.load_config(config_file)
         self.connection = None
+        self.bedrock_runtime = None
 
     def load_config(self, config_file: str) -> Dict[str, Any]:
         try:
@@ -15,7 +18,7 @@ class VectorStore:
                 config = yaml.safe_load(f)
             if not isinstance(config, dict):
                 raise ValueError("Config file does not contain a valid YAML dictionary")
-            required_keys = ['host', 'port', 'user', 'password', 'database', 'schema_name', 'table_name', 'vector_dimension']
+            required_keys = ['host', 'port', 'user', 'password', 'database', 'schema_name', 'table_name', 'vector_dimension', 'aws_region']
             missing_keys = [key for key in required_keys if key not in config]
             if missing_keys:
                 raise ValueError(f"Missing required keys in config file: {', '.join(missing_keys)}")
@@ -97,19 +100,41 @@ class VectorStore:
             return []
 
     def upload_document(self, document_text: str, metadata: Dict[str, Any]) -> bool:
-        # This is a placeholder method. In a real implementation, you would:
-        # 1. Split the document into chunks
-        # 2. Generate embeddings for each chunk
-        # 3. Add each chunk and its embedding to the vector store
-        # For now, we'll just add the whole document as one chunk with a dummy embedding
-        dummy_embedding = [0.0] * self.config['vector_dimension']
-        return self.add_vector(document_text, dummy_embedding, metadata)
+        if not self.bedrock_runtime:
+            raise ValueError("Bedrock client not initialized. Call connect_to_bedrock() first.")
+
+        # For simplicity, we're treating the entire document as one chunk
+        # In a real-world scenario, you'd want to split the document into smaller chunks
+        embedding = self.generate_embedding(document_text)
+        return self.add_vector(document_text, embedding, metadata)
 
     def get_connection_status(self) -> str:
         if self.is_connected():
             return "Connected to vector store"
         else:
             return "Not connected to vector store"
+
+    def connect_to_bedrock(self, aws_profile: str = None):
+        session = boto3.Session(profile_name=aws_profile) if aws_profile else boto3.Session()
+        self.bedrock_runtime = session.client(
+            service_name='bedrock-runtime',
+            region_name=self.config['aws_region']
+        )
+
+    def generate_embedding(self, text: str) -> List[float]:
+        if not self.bedrock_runtime:
+            raise ValueError("Bedrock client not initialized. Call connect_to_bedrock() first.")
+
+        body = json.dumps({"inputText": text})
+        response = self.bedrock_runtime.invoke_model(
+            body=body,
+            modelId='amazon.titan-embed-text-v1',
+            accept='application/json',
+            contentType='application/json'
+        )
+        response_body = json.loads(response['body'].read())
+        embedding = response_body.get('embedding')
+        return embedding
 
     def create_schema_and_table_if_not_exists(self, verbose=False) -> bool:
         if not self.is_connected():

@@ -386,6 +386,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     )
 
     parser = get_parser(default_config_files, git_root)
+    parser.add_argument('--aws-profile', help='AWS profile to use for Bedrock')
     try:
         args, unknown = parser.parse_known_args(argv)
     except AttributeError as e:
@@ -449,6 +450,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                         io.tool_output("Successfully connected to vector database.")
                         if vectorstore.create_schema_and_table_if_not_exists(verbose=True):
                             io.tool_output("Vector database schema and table are set up and ready to use.")
+                            
+                            # Connect to Bedrock
+                            vectorstore.connect_to_bedrock(args.aws_profile)
+                            io.tool_output("Connected to AWS Bedrock for embeddings generation.")
+                            
                             break
                         else:
                             io.tool_error("Failed to set up vector database schema and table.")
