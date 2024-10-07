@@ -913,6 +913,37 @@ def initialize_vectorstore(vectorstore_conf_files, aws_profile, io):
                         io.tool_error("Failed to set up vector database schema and table.")
                 else:
                     io.tool_error("Failed to connect to vector database.")
+            except Exception as e:
+                io.tool_error(f"Failed to initialize VectorStore with {conf_file}: {str(e)}")
+    
+    print("DEBUG: VectorStore initialization failed")
+    io.tool_error("VectorStore configuration file not found.")
+    io.tool_output("Please ensure the vectorstore_config.yaml file exists in the root of the project.")
+    io.tool_output("Continuing without vectorstore functionality.")
+    return None
+
+def test_vectorstore(vectorstore, io):
+    try:
+        # Test document upload
+        test_doc = "This is a test document for the vector store."
+        test_metadata = {"source": "test", "type": "document"}
+        success = vectorstore.upload_document(test_doc, test_metadata)
+        if success:
+            io.tool_output("Successfully uploaded test document to vector store.")
+        else:
+            io.tool_warning("Failed to upload test document to vector store.")
+
+        # Test vector search
+        test_query = "test document"
+        embedding = vectorstore.generate_embedding(test_query)
+        results = vectorstore.search_vectors(embedding, limit=1)
+        if results and len(results) > 0:
+            io.tool_output("Successfully retrieved search results from vector store.")
+        else:
+            io.tool_warning("No search results retrieved from vector store.")
+
+    except Exception as e:
+        io.tool_error(f"Error testing vectorstore functionality: {str(e)}")
 
 def test_vectorstore(vectorstore, io):
     try:
