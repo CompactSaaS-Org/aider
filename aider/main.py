@@ -395,6 +395,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 return 1
         raise e
 
+    # Set AWS_PROFILE environment variable if --aws-profile is provided
+    if args.aws_profile:
+        os.environ['AWS_PROFILE'] = args.aws_profile
+
     if args.verbose:
         print("Config files search order, if no --config:")
         for file in default_config_files:
