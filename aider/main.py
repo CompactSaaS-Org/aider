@@ -387,7 +387,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     parser = get_parser(default_config_files, git_root)
     parser.add_argument('--aws-profile', help='AWS profile to use for Bedrock')
-    args = parser.parse_args(argv)
+    args, unknown = parser.parse_known_args(argv)
 
     # Set AWS_PROFILE environment variable if --aws-profile is provided
     if args.aws_profile:
