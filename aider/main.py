@@ -10,6 +10,7 @@ from pathlib import Path
 import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
+import uvicorn
 
 from aider import __version__, models, urls, utils
 from aider.args import get_parser
@@ -22,6 +23,7 @@ from aider.llm import litellm  # noqa: F401; properly init litellm on launch
 from aider.repo import ANY_GIT_ERROR, GitRepo
 from aider.report import report_uncaught_exceptions
 from aider.versioncheck import check_version, install_from_main_branch, install_upgrade
+from aider.api import app as api_app
 
 from .dump import dump  # noqa: F401
 
@@ -403,6 +405,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Parse again to include any arguments that might have been defined in .env
     args = parser.parse_args(argv)
+
+    # Add a new argument for running as an API server
+    parser.add_argument('--api', action='store_true', help='Run Aider as an API server')
+    args = parser.parse_args(argv)
+
+    if args.api:
+        # Run Aider as an API server
+        uvicorn.run(api_app, host="0.0.0.0", port=8000)
+        return
 
     if not args.verify_ssl:
         import httpx
