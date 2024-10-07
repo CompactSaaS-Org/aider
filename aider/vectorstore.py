@@ -15,6 +15,10 @@ class VectorStore:
                 config = yaml.safe_load(f)
             if not isinstance(config, dict):
                 raise ValueError("Config file does not contain a valid YAML dictionary")
+            required_keys = ['host', 'port', 'user', 'password', 'database', 'schema_name', 'table_name', 'vector_dimension']
+            for key in required_keys:
+                if key not in config:
+                    raise ValueError(f"Missing required key '{key}' in config file")
             return config
         except yaml.YAMLError as e:
             raise ValueError(f"Error parsing YAML in config file: {e}")

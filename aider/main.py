@@ -468,7 +468,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 except Exception as e:
                     io.tool_error(f"Failed to initialize or test VectorStore with {conf_file}: {str(e)}")
         else:
-            io.tool_error("VectorStore configuration file not found. Continuing without vectorstore functionality.")
+            io.tool_error("VectorStore configuration file not found.")
+            io.tool_output("Please ensure the .aider.vectorstore.yml file exists in one of the following locations:")
+            for conf_file in vectorstore_conf_files:
+                io.tool_output(f"  - {conf_file}")
+            io.tool_output("Continuing without vectorstore functionality.")
     else:
         io.tool_output("VectorStore is not being used.")
 
