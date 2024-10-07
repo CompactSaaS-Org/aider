@@ -28,6 +28,10 @@ pexpect
 json5
 psutil
 
+# API dependencies
+fastapi
+uvicorn
+
 # The proper dependency is networkx[default], but this brings
 # in matplotlib and a bunch of other deps
 # https://github.com/networkx/networkx/blob/d7132daa8588f653eacac7a5bae1ee85a183fa43/pyproject.toml#L57
