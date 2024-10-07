@@ -120,6 +120,7 @@ class VectorStore:
             service_name='bedrock-runtime',
             region_name=self.config['aws_region']
         )
+        print(f"Connected to AWS Bedrock in region: {self.config['aws_region']}")
 
     def generate_embedding(self, text: str) -> List[float]:
         if not self.bedrock_runtime:

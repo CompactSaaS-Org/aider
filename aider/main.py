@@ -453,7 +453,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                             
                             # Connect to Bedrock
                             vectorstore.connect_to_bedrock(args.aws_profile)
-                            io.tool_output("Connected to AWS Bedrock for embeddings generation.")
+                            io.tool_output(f"Connected to AWS Bedrock for embeddings generation using profile: {args.aws_profile or 'default'}")
                             
                             break
                         else:
