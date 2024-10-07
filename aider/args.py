@@ -704,6 +704,11 @@ def get_parser(default_config_files, git_root):
         default="en",
         help="Specify the language for voice using ISO 639-1 code (default: auto)",
     )
+    group.add_argument(
+        "--use-vectorstore",
+        action="store_true",
+        help="Enable vectorstore functionality",
+    )
 
     return parser
 
