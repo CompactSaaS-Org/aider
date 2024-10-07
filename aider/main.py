@@ -22,6 +22,7 @@ from aider.llm import litellm  # noqa: F401; properly init litellm on launch
 from aider.repo import ANY_GIT_ERROR, GitRepo
 from aider.report import report_uncaught_exceptions
 from aider.versioncheck import check_version, install_from_main_branch, install_upgrade
+from aider.vectorstore import VectorStore
 
 from .dump import dump  # noqa: F401
 
@@ -363,6 +364,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         git_root = get_git_root()
 
     conf_fname = Path(".aider.conf.yml")
+    vectorstore_conf_fname = Path("vectorstore.conf")
 
     default_config_files = []
     try:
@@ -403,6 +405,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Parse again to include any arguments that might have been defined in .env
     args = parser.parse_args(argv)
+
+    # Initialize VectorStore
+    vectorstore = None
+    vectorstore_conf_path = Path(git_root) / vectorstore_conf_fname if git_root else vectorstore_conf_fname
+    if vectorstore_conf_path.exists():
+        vectorstore = VectorStore(str(vectorstore_conf_path))
+        if args.verbose:
+            print(f"Loaded vectorstore configuration from {vectorstore_conf_path}")
 
     if not args.verify_ssl:
         import httpx
@@ -660,6 +670,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             num_cache_warming_pings=args.cache_keepalive_pings,
             suggest_shell_commands=args.suggest_shell_commands,
             chat_language=args.chat_language,
+            vectorstore=vectorstore,
         )
     except ValueError as err:
         io.tool_error(str(err))

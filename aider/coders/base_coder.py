@@ -90,6 +90,7 @@ class Coder:
     suggest_shell_commands = True
     ignore_mentions = None
     chat_language = None
+    vectorstore = None
 
     @classmethod
     def create(
@@ -263,7 +264,9 @@ class Coder:
         num_cache_warming_pings=0,
         suggest_shell_commands=True,
         chat_language=None,
+        vectorstore=None,
     ):
+        self.vectorstore = vectorstore
         self.chat_language = chat_language
         self.commit_before_message = []
         self.aider_commit_hashes = set()
@@ -727,8 +730,12 @@ class Coder:
             while True:
                 try:
                     user_message = self.get_input()
-                    self.run_one(user_message, preproc)
-                    self.show_undo_hint()
+                    if user_message.startswith("/vectorstore"):
+                        args = user_message.split()[1:]
+                        self.handle_vectorstore_command(args)
+                    else:
+                        self.run_one(user_message, preproc)
+                        self.show_undo_hint()
                 except KeyboardInterrupt:
                     self.keyboard_interrupt()
         except EOFError:

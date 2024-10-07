@@ -192,7 +192,9 @@ class InputOutput:
         dry_run=False,
         llm_history_file=None,
         editingmode=EditingMode.EMACS,
+        vectorstore=None,
     ):
+        self.vectorstore = vectorstore
         self.never_prompts = set()
         self.editingmode = editingmode
         no_color = os.environ.get("NO_COLOR")
@@ -361,6 +363,8 @@ class InputOutput:
             show = " ".join(rel_fnames) + "\n"
         if edit_format:
             show += edit_format
+        if self.vectorstore:
+            show += f"VectorStore: {'Connected' if self.vectorstore.is_connected() else 'Disconnected'}\n"
         show += "> "
 
         inp = ""

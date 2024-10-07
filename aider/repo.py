@@ -30,6 +30,7 @@ class GitRepo:
     subtree_only = False
     ignore_file_cache = {}
     git_repo_error = None
+    vectorstore_conf_file = None
 
     def __init__(
         self,
@@ -95,6 +96,8 @@ class GitRepo:
 
         if aider_ignore_file:
             self.aider_ignore_file = Path(aider_ignore_file)
+        
+        self.vectorstore_conf_file = Path(self.root) / "vectorstore.conf"
 
     def commit(self, fnames=None, context=None, message=None, aider_edits=False):
         if not fnames and not self.repo.is_dirty():
