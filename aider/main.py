@@ -435,26 +435,26 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     vectorstore = None
     vectorstore_conf_path = Path(git_root) / vectorstore_conf_fname if git_root else vectorstore_conf_fname
     if vectorstore_conf_path.exists() and args.use_vectorstore:
+        io.tool_output("Initializing VectorStore...")
         try:
             vectorstore = VectorStore(str(vectorstore_conf_path))
-            if args.verbose:
-                io.tool_output(f"Loaded vectorstore configuration from {vectorstore_conf_path}")
+            io.tool_output(f"Loaded vectorstore configuration from {vectorstore_conf_path}")
             
-            if vectorstore.connect(verbose=args.verbose):
-                if vectorstore.create_schema_and_table_if_not_exists(verbose=args.verbose):
-                    if args.verbose:
-                        io.tool_output("Vector database is set up and ready to use.")
-                        
-                        # Test vectorstore functionality
-                        test_vector = np.random.rand(768)  # Assuming 768-dimensional vectors
-                        vectorstore.add_vector("test_document", test_vector, {"test": "metadata"})
-                        io.tool_output("Added test vector to vectorstore")
-                        
-                        similar_vectors = vectorstore.search_vectors(test_vector, limit=1)
-                        if similar_vectors:
-                            io.tool_output(f"Found similar vector: {similar_vectors[0]['id']}, distance: {similar_vectors[0]['distance']:.4f}")
-                        else:
-                            io.tool_output("No similar vectors found in test search.")
+            if vectorstore.connect(verbose=True):
+                io.tool_output("Successfully connected to vector database.")
+                if vectorstore.create_schema_and_table_if_not_exists(verbose=True):
+                    io.tool_output("Vector database schema and table are set up and ready to use.")
+                    
+                    # Test vectorstore functionality
+                    test_vector = np.random.rand(768)  # Assuming 768-dimensional vectors
+                    vectorstore.add_vector("test_document", test_vector, {"test": "metadata"})
+                    io.tool_output("Added test vector to vectorstore")
+                    
+                    similar_vectors = vectorstore.search_vectors(test_vector, limit=1)
+                    if similar_vectors:
+                        io.tool_output(f"Found similar vector: {similar_vectors[0]['id']}, distance: {similar_vectors[0]['distance']:.4f}")
+                    else:
+                        io.tool_output("No similar vectors found in test search.")
                 else:
                     io.tool_error("Failed to set up vector database schema and table.")
             else:
@@ -462,6 +462,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         except Exception as e:
             io.tool_error(f"Failed to initialize or test VectorStore: {str(e)}")
             io.tool_output("Continuing without vectorstore functionality.")
+    else:
+        io.tool_output("VectorStore is not being used or configuration file not found.")
 
     if not args.verify_ssl:
         import httpx
