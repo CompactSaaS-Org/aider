@@ -410,7 +410,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Initialize VectorStore
     vectorstore = None
     vectorstore_conf_path = Path(git_root) / vectorstore_conf_fname if git_root else vectorstore_conf_fname
-    if vectorstore_conf_path.exists():
+    if vectorstore_conf_path.exists() and args.use_vectorstore:
         vectorstore = VectorStore(str(vectorstore_conf_path))
         if args.verbose:
             print(f"Loaded vectorstore configuration from {vectorstore_conf_path}")
