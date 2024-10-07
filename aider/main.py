@@ -27,6 +27,9 @@ from aider.vectorstore import VectorStore
 
 from .dump import dump  # noqa: F401
 
+# Global variable to track vector store initialization
+vectorstore_initialized = False
+
 
 def check_config_files_for_yes(config_files):
     found = False
@@ -366,6 +369,7 @@ def sanity_check_repo(repo, io):
 
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
+    global vectorstore_initialized
     print("DEBUG: Entering main function")
     report_uncaught_exceptions()
 
@@ -447,10 +451,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Initialize VectorStore
     vectorstore = None
-    if args.use_vectorstore:
-        print("DEBUG: Initializing VectorStore (1st time)")
+    if args.use_vectorstore and not vectorstore_initialized:
+        print("DEBUG: Initializing VectorStore")
         io.tool_output("Initializing VectorStore...")
         vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
+        vectorstore_initialized = True
 
     if not args.verify_ssl:
         import httpx
@@ -511,12 +516,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             raise err
         io = get_io(False)
         io.tool_warning("Terminal does not support pretty output (UnicodeDecodeError)")
-
-    # Initialize VectorStore
-    if args.use_vectorstore and vectorstore is None:
-        print("DEBUG: Initializing VectorStore (2nd time)")
-        io.tool_output("Initializing VectorStore...")
-        vectorstore = initialize_vectorstore(vectorstore_conf_files, args.aws_profile, io)
 
     if args.gui and not return_coder:
         print("DEBUG: Launching GUI")
