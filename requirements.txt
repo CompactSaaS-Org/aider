@@ -227,3 +227,5 @@ psycopg2-binary==2.9.9
     # via -r requirements/requirements.in
 pgvector==0.2.5
     # via -r requirements/requirements.in
+boto3
+    # via -r requirements/requirements.in
